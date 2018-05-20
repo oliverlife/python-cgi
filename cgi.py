@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 # CGI Documents: http://www.ietf.org/rfc/rfc3875.txt
-class Respone:
+class Respone(object):
     def __init__(self):
         self.protocol = "HTTP/1.1"
         self.statusMap = {200: "OK"}
@@ -36,25 +36,34 @@ class Respone:
             text = self.content
         return text
 
+    def raw(self):
+        return self.contentTypeSection() + self.statusSection() + self.headerSection() + "\n" + self.contentSection()
+
     def __del__(self):
-        print self.contentTypeSection() + self.statusSection() + self.headerSection() + "\n" + self.contentSection()
+        print(self.raw())
+
+class JsonRespone(Respone):
+    def super(self):
+        return super(JsonRespone,self)
+
+    def __init__(self):
+        self.super().__init__()
+        self.json = {}
+        self.contentType = "text/json"
+
+    def contentSection(self):
+        self.content = json.dumps(self.json)
+        return self.super().contentSection()
 
 import cgi, cgitb
 cgitb.enable()
 
 import os
+import json
 
-respone = Respone()
-respone.setCookies["cookie-test"] = "test"
-respone.setCookies["cookie-test2"] = "test2"
+respone = JsonRespone()
+respone.setCookies["cookie-test"] = "test1013377"
+respone.setCookies["cookie-test2"] = "test1023388"
 respone.header["xixi"] = "ts ejr"
-
-str = ""
-str += "<meta charset=\"utf-8\">"
-str += "<b>环境变量 hahahuohuo</b><br>"
-str += "<ul>"
-for key in os.environ.keys():
-    str += "<li><span style='color:green'>%30s </span> : %s </li>" % (key,os.environ[key])
-str += "</ul>"
-respone.content = str
+respone.json = {"a": "b", "c": {"a": "bee22"}}
 
